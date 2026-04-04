@@ -70,15 +70,87 @@ vkd3d_private_includes  = include_directories(vkd3d_private_includes)
 vkd3d_shader_private_includes = [ './libs/vkd3d-shader' ]
 vkd3d_shader_private_includes = include_directories(vkd3d_shader_private_includes)
 
-idl_compiler  = find_program('widl', required : false)
-# widl-stable is used on Debian. If cross-file defines widl-mingw-tools-fallback, that will also be attempted.
-if not idl_compiler.found()
-  idl_compiler  = find_program('widl-stable', 'widl-mingw-tools-fallback')
+# ============================================================================
+# IDL Compiler Detection & WSL WIDL Wrapper Support
+# ============================================================================
+
+# Check for WSL WIDL wrapper option
+widl_from_wsl = get_option('widl_from_wsl')
+
+if widl_from_wsl
+  # Use wrapper script to call WSL WIDL from Windows
+  if host_machine.system() == 'windows'
+    # Use Python wrapper (more reliable path handling)
+    python_exe = find_program('python3', 'python', required : true)
+    widl_wrapper = join_paths(meson.project_source_root(), 'scripts', 'widl-wrapper.py')
+    
+    message('INFO: Using Python WIDL wrapper from WSL')
+    idl_compiler = python_exe
+    
+  else
+    message('INFO: widl_from_wsl option only applies to Windows builds. Using native WIDL.')
+    idl_compiler = find_program('widl', required : false)
+  endif
+
+else
+  # Original logic: Try MIDL first (Windows), then WIDL (Linux/WSL)
+  # NOTE: MIDL often fails with path issues, so we skip it and go straight to WIDL
+  idl_compiler = find_program('widl', required : false)
+  if not idl_compiler.found()
+    idl_compiler = find_program('widl-stable', 'widl-mingw-tools-fallback', required : false)
+  endif
+  if not idl_compiler.found()
+    idl_compiler = find_program('midl', required : false)
+  endif
 endif
 
-idl_generator = generator(idl_compiler,
-  output    : [ '@BASENAME@.h' ],
-  arguments : [ '-h', '-o', '@OUTPUT@', '@INPUT@' ])
+# Configure IDL generator based on which compiler was found
+if idl_compiler.found()
+  compiler_name = idl_compiler.full_path()
+    # Check if using WSL wrapper (Python executable)
+  is_wrapper = (compiler_name.contains('python3') or 
+                compiler_name.contains('python.exe'))
+  
+  if is_wrapper
+    # Using Python wrapper - need to pass script as first argument
+    # Format: python widl-wrapper.py -h -o output.h input.idl
+    widl_wrapper_path = join_paths(meson.project_source_root(), 'scripts', 'widl-wrapper.py')
+    message('Configuring generator for Python WSL WIDL wrapper')
+    idl_generator = generator(idl_compiler,
+      output    : [ '@BASENAME@.h' ],
+      arguments : [ widl_wrapper_path, '-h', '-o', '@OUTPUT@', '@INPUT@' ])
+  
+  elif compiler_name.contains('midl')
+    # MIDL arguments: midl /h output.h /out directory input.idl
+    message('Configuring generator for Microsoft MIDL')
+    idl_generator = generator(idl_compiler,
+      output    : [ '@BASENAME@.h' ],
+      arguments : [ '/h', '@OUTPUT@', '@INPUT@' ])
+  
+  else
+    # WIDL arguments: widl -h -o output.h input.idl
+    message('Configuring generator for Wine WIDL')
+    idl_generator = generator(idl_compiler,
+      output    : [ '@BASENAME@.h' ],
+      arguments : [ '-h', '-o', '@OUTPUT@', '@INPUT@' ])
+  endif
+  
+  message('IDL Compiler: @0@'.format(compiler_name))
+
+else
+  # No IDL compiler found
+  warning('No IDL compiler found (MIDL, WIDL, or wrapper). IDL files will not be compiled.')
+  message('Options to fix this:')
+  message('  1. Install MIDL (Windows): "Visual Studio Build Tools"')
+  message('  2. Install WIDL (Linux): "apt-get install wine-development"')
+  message('  3. Enable WSL WIDL wrapper: meson setup -Dwidl_from_wsl=true')
+  message('  4. Pre-generate headers manually with: "wsl widl -h -o include/file.h include/file.idl"')
+  
+  # Fallback: dummy generator
+  idl_generator = generator(find_program('true'),
+    output    : [ '@BASENAME@.h' ],
+    arguments : [ '@INPUT@' ])
+endif
 
 glsl_compiler  = find_program('glslang', 'glslangValidator')
 glsl_args = [ '-V', '--target-env', 'vulkan1.3', '--vn', '@BASENAME@', '@INPUT@', '-o', '@OUTPUT@', '--depfile', '@DEPFILE@', '--quiet' ]

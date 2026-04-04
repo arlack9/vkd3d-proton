@@ -1,0 +1,21 @@
+[binaries]
+c = 'clang'
+cpp = 'clang++'
+ar = 'llvm-ar'
+strip = 'llvm-strip'
+midl = 'F:\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\midl.exe'
+
+[built-in options]
+c_args = ['-target', 'i686-pc-windows-msvc', '-fms-compatibility', '-m32']
+cpp_args = ['-target', 'i686-pc-windows-msvc', '-fms-compatibility', '-fms-extensions', '-m32']
+c_link_args = ['-target', 'i686-pc-windows-msvc', '-m32']
+cpp_link_args = ['-target', 'i686-pc-windows-msvc', '-m32']
+
+[properties]
+needs_exe_wrapper = false
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'
