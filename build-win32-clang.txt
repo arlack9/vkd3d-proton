@@ -3,7 +3,6 @@ c = 'clang'
 cpp = 'clang++'
 ar = 'llvm-ar'
 strip = 'llvm-strip'
-midl = 'F:\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\midl.exe'
 
 [built-in options]
 c_args = ['-target', 'i686-pc-windows-msvc', '-fms-compatibility', '-m32']
