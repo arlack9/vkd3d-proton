@@ -15,10 +15,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
+// At the top of the file, after existing includes
+
+
 
 #define VKD3D_DBG_CHANNEL VKD3D_DBG_CHANNEL_SHADER
 
 #define DXIL_SPV_ENABLE_EXPERIMENTAL_WORKGRAPHS
+
+#include "dxil_cfg_reader.h"//new
 #define DXIL_SPV_ENABLE_EXPERIMENTAL_MULTIVIEW
 #include "vkd3d_shader_private.h"
 #include "vkd3d_utf8.h"
@@ -1409,6 +1414,25 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
     }
     else
     {
+
+            //newly added 4-5-26
+                    // ========== DXIL CFG EXTRACTION (ADD THIS BLOCK) ==========
+        #ifdef ENABLE_DXIL_CFG_EXTRACTION
+        if (compiled.data && compiled.size > 0) {
+            dxil_cfg_construct_t* cfg = dxil_extract_cfg_from_spirv(
+                (const uint32_t*)compiled.data,
+                compiled.size / sizeof(uint32_t)
+            );
+            if (cfg && cfg->num_blocks > 0) {
+                WARN("DXIL CFG: %u blocks, entry block %u\n", 
+                     cfg->num_blocks, cfg->entry_block);
+            }
+            dxil_free_cfg(cfg);
+        }
+        #endif
+        // ========== END CFG EXTRACTION ==========
+
+
         if (!(code = vkd3d_malloc(compiled.size)))
         {
             ret = VKD3D_ERROR_OUT_OF_MEMORY;
