@@ -23,7 +23,6 @@
 
 #define DXIL_SPV_ENABLE_EXPERIMENTAL_WORKGRAPHS
 
-#include "dxil_cfg_reader.h"//new
 #define DXIL_SPV_ENABLE_EXPERIMENTAL_MULTIVIEW
 #include "vkd3d_shader_private.h"
 #include "vkd3d_utf8.h"
@@ -1387,6 +1386,32 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
         goto end;
     }
 
+    /* Extract and validate CFG metadata from DXIL shader */
+    {
+        const uint32_t* cfg_headers = NULL;
+        const uint32_t* cfg_merges = NULL;
+        const uint32_t* cfg_continues = NULL;
+        const uint32_t* cfg_hints = NULL;
+        size_t cfg_count = 0;
+
+        if (dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+                                       &cfg_continues, &cfg_hints, &cfg_count) == DXIL_SPV_SUCCESS)
+        {
+            TRACE("DXIL CFG: %zu control flow blocks extracted\n", cfg_count);
+            /* CFG metadata is now available for shader analysis:
+             * - cfg_headers: array of control flow header block IDs
+             * - cfg_merges: array of merge block IDs
+             * - cfg_continues: array of continue block IDs (for loops)
+             * - cfg_hints: array of control flow hints/metadata
+             * This data can be used for optimization or debugging purposes.
+             */
+        }
+        else
+        {
+            TRACE("DXIL CFG: No control flow metadata available\n");
+        }
+    }
+
     {
         /* For now, we cannot support view instancing with fallback paths, but that's not a dxil-spirv issue,
          * but rather a vkd3d-proton issue. */
@@ -1415,24 +1440,7 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
     else
     {
 
-            //newly added 4-5-26
-                    // ========== DXIL CFG EXTRACTION (ADD THIS BLOCK) ==========
-        #ifdef ENABLE_DXIL_CFG_EXTRACTION
-        if (compiled.data && compiled.size > 0) {
-            dxil_cfg_construct_t* cfg = dxil_extract_cfg_from_spirv(
-                (const uint32_t*)compiled.data,
-                compiled.size / sizeof(uint32_t)
-            );
-            if (cfg && cfg->num_blocks > 0) {
-                WARN("DXIL CFG: %u blocks, entry block %u\n", 
-                     cfg->num_blocks, cfg->entry_block);
-            }
-            dxil_free_cfg(cfg);
-        }
-        #endif
-        // ========== END CFG EXTRACTION ==========
-
-
+    
         if (!(code = vkd3d_malloc(compiled.size)))
         {
             ret = VKD3D_ERROR_OUT_OF_MEMORY;
@@ -1711,6 +1719,32 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
     {
         ret = VKD3D_ERROR_INVALID_ARGUMENT;
         goto end;
+    }
+
+    /* Extract and validate CFG metadata from DXIL shader */
+    {
+        const uint32_t* cfg_headers = NULL;
+        const uint32_t* cfg_merges = NULL;
+        const uint32_t* cfg_continues = NULL;
+        const uint32_t* cfg_hints = NULL;
+        size_t cfg_count = 0;
+
+        if (dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+                                       &cfg_continues, &cfg_hints, &cfg_count) == DXIL_SPV_SUCCESS)
+        {
+            TRACE("DXIL CFG: %zu control flow blocks extracted (ray tracing)\n", cfg_count);
+            /* CFG metadata is now available for shader analysis:
+             * - cfg_headers: array of control flow header block IDs
+             * - cfg_merges: array of merge block IDs
+             * - cfg_continues: array of continue block IDs (for loops)
+             * - cfg_hints: array of control flow hints/metadata
+             * This data can be used for optimization or debugging purposes.
+             */
+        }
+        else
+        {
+            TRACE("DXIL CFG: No control flow metadata available (ray tracing)\n");
+        }
     }
 
     if (dxil_spv_converter_get_compiled_spirv(converter, &compiled) != DXIL_SPV_SUCCESS)
