@@ -32,6 +32,26 @@
 #include <stdio.h>
 #include <dxil_spirv_c.h>
 
+/* ============================================================================
+ * DXIL CFG Logger Initialization and Cleanup
+ * ============================================================================ */
+
+static void dxil_cfg_logger_init(void) __attribute__((constructor));
+static void dxil_cfg_logger_init(void)
+{
+    /* Initialize CFG logging at module load time */
+    dxil_cfg_log_init("C:\\dxil_cfg_log.txt");
+}
+
+static void dxil_cfg_logger_cleanup(void) __attribute__((destructor));
+static void dxil_cfg_logger_cleanup(void)
+{
+    /* Close and flush CFG logger at module unload */
+    dxil_cfg_log_close();
+}
+
+/* ============================================================================ */
+
 static bool dxil_match_shader_visibility(enum vkd3d_shader_visibility visibility,
                                          dxil_spv_shader_stage stage)
 {
@@ -1406,7 +1426,10 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
-            dxil_cfg_log_metadata(NULL, "shader", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+            const char *shader_name_ptr = NULL;
+            if (dxil_spv_converter_get_entry_point(converter, &shader_name_ptr) != DXIL_SPV_SUCCESS)
+                shader_name_ptr = NULL;
+            dxil_cfg_log_metadata(NULL, shader_name_ptr ? shader_name_ptr : "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
@@ -1742,7 +1765,10 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
-            dxil_cfg_log_metadata(NULL, "shader_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+            const char *shader_name_ptr = NULL;
+            if (dxil_spv_converter_get_entry_point(converter, &shader_name_ptr) != DXIL_SPV_SUCCESS)
+                shader_name_ptr = NULL;
+            dxil_cfg_log_metadata(NULL, shader_name_ptr ? shader_name_ptr : "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
