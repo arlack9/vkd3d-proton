@@ -3,6 +3,7 @@ vkd3d_shader_src = [
   'dxil.c',
   'dxbc.c',
   'vkd3d_shader_main.c',
+  'dxil_cfg_logger.c',
   '3rdparty/md5/md5.c',
 ]
 

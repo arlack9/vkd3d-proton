@@ -1,0 +1,73 @@
+// dxil_cfg_logger.c
+#include "dxil_cfg_logger.h"
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+
+static FILE* g_log_file = NULL;
+static const char* g_game_name = "Unknown";
+
+void dxil_cfg_log_init(const char* log_path)
+{
+    if (g_log_file) fclose(g_log_file);
+    
+    g_log_file = fopen(log_path, "w");
+    if (g_log_file) {
+        fprintf(g_log_file, "DXIL CFG Metadata Log\n");
+        fprintf(g_log_file, "Started: %s", ctime(&(time_t){time(NULL)}));
+        fprintf(g_log_file, "========================================\n\n");
+        fflush(g_log_file);
+    }
+}
+
+void dxil_cfg_log_set_game(const char* game_name)
+{
+    g_game_name = game_name ? game_name : "Unknown";
+}
+
+void dxil_cfg_log_metadata(const char* game_name,
+                           const char* shader_name,
+                           const uint32_t* headers,
+                           const uint32_t* merges,
+                           const uint32_t* continues,
+                           const uint32_t* hints,
+                           size_t block_count)
+{
+    if (!g_log_file) return;
+    
+    const char* actual_game = game_name ? game_name : g_game_name;
+    
+    fprintf(g_log_file, "========================================\n");
+    fprintf(g_log_file, "Game: %s\n", actual_game);
+    fprintf(g_log_file, "Shader: %s\n", shader_name ? shader_name : "unknown");
+    fprintf(g_log_file, "Block Count: %zu\n", block_count);
+    fprintf(g_log_file, "----------------------------------------\n");
+    
+    if (headers && merges && continues && hints && block_count > 0) {
+        fprintf(g_log_file, "Index | Header | Merge | Continue | Hint\n");
+        fprintf(g_log_file, "------|--------|-------|----------|-----\n");
+        
+        for (size_t i = 0; i < block_count && i < 1000; i++) {
+            fprintf(g_log_file, "%5zu | %6u | %5u | %8u | %4u\n",
+                    i, headers[i], merges[i], continues[i], hints[i]);
+        }
+        
+        if (block_count > 1000) {
+            fprintf(g_log_file, "... and %zu more blocks\n", block_count - 1000);
+        }
+    } else {
+        fprintf(g_log_file, "NO VALID CFG DATA\n");
+    }
+    
+    fprintf(g_log_file, "========================================\n\n");
+    fflush(g_log_file);
+}
+
+void dxil_cfg_log_close(void)
+{
+    if (g_log_file) {
+        fprintf(g_log_file, "Log closed: %s", ctime(&(time_t){time(NULL)}));
+        fclose(g_log_file);
+        g_log_file = NULL;
+    }
+}

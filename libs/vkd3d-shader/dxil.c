@@ -27,6 +27,7 @@
 #include "vkd3d_shader_private.h"
 #include "vkd3d_utf8.h"
 #include "vkd3d_string.h"
+#include "dxil_cfg_logger.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <dxil_spirv_c.h>
@@ -1405,6 +1406,7 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
+            dxil_cfg_log_metadata(NULL, "shader", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
@@ -1740,6 +1742,7 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
+            dxil_cfg_log_metadata(NULL, "shader_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
