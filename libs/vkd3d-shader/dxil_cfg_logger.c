@@ -13,8 +13,9 @@ void dxil_cfg_log_init(const char* log_path)
     
     g_log_file = fopen(log_path, "w");
     if (g_log_file) {
+        time_t start_time = time(NULL);
         fprintf(g_log_file, "DXIL CFG Metadata Log\n");
-        fprintf(g_log_file, "Started: %s", ctime(&(time_t){time(NULL)}));
+        fprintf(g_log_file, "Started: %s", ctime(&start_time));
         fprintf(g_log_file, "========================================\n\n");
         fflush(g_log_file);
     }
@@ -66,7 +67,8 @@ void dxil_cfg_log_metadata(const char* game_name,
 void dxil_cfg_log_close(void)
 {
     if (g_log_file) {
-        fprintf(g_log_file, "Log closed: %s", ctime(&(time_t){time(NULL)}));
+        time_t close_time = time(NULL);
+        fprintf(g_log_file, "Log closed: %s", ctime(&close_time));
         fclose(g_log_file);
         g_log_file = NULL;
     }

@@ -1426,10 +1426,7 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
-            const char *shader_name_ptr = NULL;
-            if (dxil_spv_converter_get_entry_point(converter, &shader_name_ptr) != DXIL_SPV_SUCCESS)
-                shader_name_ptr = NULL;
-            dxil_cfg_log_metadata(NULL, shader_name_ptr ? shader_name_ptr : "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+            dxil_cfg_log_metadata(NULL, "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
@@ -1765,10 +1762,7 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
              * - cfg_hints: array of control flow hints/metadata
              * This data can be used for optimization or debugging purposes.
              */
-            const char *shader_name_ptr = NULL;
-            if (dxil_spv_converter_get_entry_point(converter, &shader_name_ptr) != DXIL_SPV_SUCCESS)
-                shader_name_ptr = NULL;
-            dxil_cfg_log_metadata(NULL, shader_name_ptr ? shader_name_ptr : "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+            dxil_cfg_log_metadata(NULL, "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
