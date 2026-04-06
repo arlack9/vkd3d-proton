@@ -1,18 +1,18 @@
 @echo off
 REM ============================================================================
-REM VKD3D-Proton Complete Build Script
+REM VKD3D-Proton Complete Build Script - RELEASE VERSION
 REM ============================================================================
 REM This script:
 REM   1. Cleans old build directories
 REM   2. Configures Meson with WSL WIDL wrapper support
-REM   3. Compiles the project
+REM   3. Compiles the project in RELEASE mode
 REM ============================================================================
 
 setlocal enabledelayedexpansion
 
 echo.
 echo ============================================================================
-echo VKD3D-Proton Complete Build
+echo VKD3D-Proton Release Build
 echo ============================================================================
 echo.
 
@@ -119,14 +119,13 @@ if not errorlevel 1 (
 )
 echo.
 
-echo [Step 4] Configuring Meson...
+echo [Step 4] Configuring Meson for RELEASE...
 echo.
 
 mkdir builddir >nul 2>&1
 
-REM Use WSL WIDL wrapper to avoid MIDL path issues
-echo Configuring with WSL WIDL wrapper and clang compiler...
-meson setup builddir --native-file clang-native.ini -Dwidl_from_wsl=true
+REM Configure with RELEASE build type
+meson setup builddir --native-file clang-native.ini -Dwidl_from_wsl=true --buildtype=release
 
 if errorlevel 1 (
     echo ERROR: Meson configuration failed!
@@ -134,7 +133,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [Step 5] Compiling...
+echo [Step 5] Compiling RELEASE build...
 echo.
 
 meson compile -C builddir
@@ -147,11 +146,16 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================================
-echo ✓ Build Complete!
+echo ✓ Release Build Complete!
 echo ============================================================================
 echo.
+echo Output DLLs location: builddir\libs\dxgi-proxy\dxgi.dll
+echo                       builddir\libs\d3d12core\d3d12core.dll
+echo.
 echo To install:
-echo   meson install -C builddir
+echo   copy builddir\libs\d3d12core\d3d12core.dll C:\SteamLibrary\steamapps\common\HITMAN 3\Retail\
+echo   copy builddir\libs\dxgi-proxy\dxgi.dll C:\SteamLibrary\steamapps\common\HITMAN 3\Retail\
+echo   copy builddir\libs\d3d12\d3d12.dll C:\SteamLibrary\steamapps\common\HITMAN 3\Retail\
 echo.
 
 endlocal
