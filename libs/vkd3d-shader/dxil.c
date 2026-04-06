@@ -39,8 +39,8 @@
 static void dxil_cfg_logger_init(void) __attribute__((constructor));
 static void dxil_cfg_logger_init(void)
 {
-    /* Initialize CFG logging at module load time */
-    dxil_cfg_log_init("C:\\dxil_cfg_log.txt");
+    /* Initialize CFG logging at module load time with safe path */
+    dxil_cfg_log_init_with_safe_path("dxil_cfg_log.txt");
 }
 
 static void dxil_cfg_logger_cleanup(void) __attribute__((destructor));
@@ -1415,16 +1415,13 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
         const uint32_t* cfg_hints = NULL;
         size_t cfg_count = 0;
 
-        /* Debug: Log before CFG extraction */
-        FILE* debug_cfg = fopen("C:\\dxil_cfg_debug.txt", "a");
-        if (debug_cfg) {
-            fprintf(debug_cfg, "[DEBUG] About to call dxil_spv_converter_get_cfg (regular shader)\n");
-            fflush(debug_cfg);
-            fclose(debug_cfg);
-        }
+        /* Use TRACE for debug instead of hardcoded file paths */
+        TRACE("About to call dxil_spv_converter_get_cfg (regular shader)\n");
 
-        if (dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
-                                       &cfg_continues, &cfg_hints, &cfg_count) == DXIL_SPV_SUCCESS)
+        int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+                                                    &cfg_continues, &cfg_hints, &cfg_count);
+        
+        if (cfg_result == DXIL_SPV_SUCCESS)
         {
             TRACE("DXIL CFG: %zu control flow blocks extracted\n", cfg_count);
             /* CFG metadata is now available for shader analysis:
@@ -1435,27 +1432,12 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
              * This data can be used for optimization or debugging purposes.
              */
             
-            /* Debug: Log success */
-            FILE* debug_success = fopen("C:\\dxil_cfg_debug.txt", "a");
-            if (debug_success) {
-                fprintf(debug_success, "[DEBUG] CFG extracted successfully: %zu blocks\n", cfg_count);
-                fflush(debug_success);
-                fclose(debug_success);
-            }
-            
+            TRACE("CFG extracted successfully: %zu blocks\n", cfg_count);
             dxil_cfg_log_metadata(NULL, "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
-            TRACE("DXIL CFG: No control flow metadata available\n");
-            
-            /* Debug: Log failure */
-            FILE* debug_fail = fopen("C:\\dxil_cfg_debug.txt", "a");
-            if (debug_fail) {
-                fprintf(debug_fail, "[DEBUG] CFG extraction failed\n");
-                fflush(debug_fail);
-                fclose(debug_fail);
-            }
+            TRACE("DXIL CFG: No control flow metadata available (result: %d)\n", cfg_result);
         }
     }
 
@@ -1776,16 +1758,13 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
         const uint32_t* cfg_hints = NULL;
         size_t cfg_count = 0;
 
-        /* Debug: Log before CFG extraction */
-        FILE* debug_cfg = fopen("C:\\dxil_cfg_debug.txt", "a");
-        if (debug_cfg) {
-            fprintf(debug_cfg, "[DEBUG] About to call dxil_spv_converter_get_cfg (ray tracing)\n");
-            fflush(debug_cfg);
-            fclose(debug_cfg);
-        }
+        /* Use TRACE for debug instead of hardcoded file paths */
+        TRACE("About to call dxil_spv_converter_get_cfg (ray tracing)\n");
 
-        if (dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
-                                       &cfg_continues, &cfg_hints, &cfg_count) == DXIL_SPV_SUCCESS)
+        int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+                                                    &cfg_continues, &cfg_hints, &cfg_count);
+        
+        if (cfg_result == DXIL_SPV_SUCCESS)
         {
             TRACE("DXIL CFG: %zu control flow blocks extracted (ray tracing)\n", cfg_count);
             /* CFG metadata is now available for shader analysis:
@@ -1796,27 +1775,12 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
              * This data can be used for optimization or debugging purposes.
              */
             
-            /* Debug: Log success */
-            FILE* debug_success = fopen("C:\\dxil_cfg_debug.txt", "a");
-            if (debug_success) {
-                fprintf(debug_success, "[DEBUG] CFG extracted successfully (ray tracing): %zu blocks\n", cfg_count);
-                fflush(debug_success);
-                fclose(debug_success);
-            }
-            
+            TRACE("CFG extracted successfully (ray tracing): %zu blocks\n", cfg_count);
             dxil_cfg_log_metadata(NULL, "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
         }
         else
         {
-            TRACE("DXIL CFG: No control flow metadata available (ray tracing)\n");
-            
-            /* Debug: Log failure */
-            FILE* debug_fail = fopen("C:\\dxil_cfg_debug.txt", "a");
-            if (debug_fail) {
-                fprintf(debug_fail, "[DEBUG] CFG extraction failed (ray tracing)\n");
-                fflush(debug_fail);
-                fclose(debug_fail);
-            }
+            TRACE("DXIL CFG: No control flow metadata available (ray tracing, result: %d)\n", cfg_result);
         }
     }
 
