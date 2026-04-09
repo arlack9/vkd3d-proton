@@ -1758,6 +1758,8 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
         goto end;
     }
 
+
+    //////////////9-4-2 workde when commented out new updated master
     /* Extract and validate CFG metadata from DXIL shader */
     // {
     //     const uint32_t* cfg_headers = NULL;
