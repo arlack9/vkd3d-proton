@@ -144,10 +144,8 @@ static const struct vkd3d_optional_extension_info optional_device_extensions[] =
     VK_EXTENSION_DISABLE_COND(NVX_IMAGE_VIEW_HANDLE, NVX_image_view_handle, VKD3D_CONFIG_FLAG_NO_NVX),
     VK_EXTENSION(NV_COMPUTE_SHADER_DERIVATIVES, NV_compute_shader_derivatives),
     VK_EXTENSION_COND(NV_DEVICE_DIAGNOSTIC_CHECKPOINTS, NV_device_diagnostic_checkpoints, VKD3D_CONFIG_FLAG_BREADCRUMBS | VKD3D_CONFIG_FLAG_BREADCRUMBS_TRACE),
-    VK_EXTENSION(NV_DEVICE_GENERATED_COMMANDS, NV_device_generated_commands),
     VK_EXTENSION(NV_SHADER_SUBGROUP_PARTITIONED, NV_shader_subgroup_partitioned),
     VK_EXTENSION(NV_MEMORY_DECOMPRESSION, NV_memory_decompression),
-    VK_EXTENSION(NV_DEVICE_GENERATED_COMMANDS_COMPUTE, NV_device_generated_commands_compute),
     VK_EXTENSION_VERSION(NV_LOW_LATENCY_2, NV_low_latency2, 2),
     VK_EXTENSION(NV_RAW_ACCESS_CHAINS, NV_raw_access_chains),
     VK_EXTENSION(NV_COOPERATIVE_MATRIX_2, NV_cooperative_matrix2),
@@ -604,8 +602,7 @@ static const struct vkd3d_instance_application_meta application_override[] = {
     { VKD3D_STRING_COMPARE_EXACT, "HaloInfinite.exe",
             VKD3D_CONFIG_FLAG_FORCE_RAW_VA_CBV |
             VKD3D_CONFIG_FLAG_USE_HOST_IMPORT_FALLBACK | VKD3D_CONFIG_FLAG_PREALLOCATE_SRV_MIP_CLAMPS |
-            VKD3D_CONFIG_FLAG_REQUIRES_COMPUTE_INDIRECT_TEMPLATES | VKD3D_CONFIG_FLAG_NO_UPLOAD_HVV |
-            VKD3D_CONFIG_FLAG_DISABLE_DGCC, 0 },
+            VKD3D_CONFIG_FLAG_NO_UPLOAD_HVV, 0 },
     /* (1182900) Workaround amdgpu kernel bug with host memory import and concurrent submissions. */
     { VKD3D_STRING_COMPARE_EXACT, "APlagueTaleRequiem_x64.exe",
             VKD3D_CONFIG_FLAG_USE_HOST_IMPORT_FALLBACK | VKD3D_CONFIG_FLAG_DISABLE_UAV_COMPRESSION, 0 },
@@ -650,7 +647,7 @@ static const struct vkd3d_instance_application_meta application_override[] = {
     { VKD3D_STRING_COMPARE_EXACT, "RDR.exe", VKD3D_CONFIG_FLAG_NO_UPLOAD_HVV, 0 },
     /* Starfield (1716740) */
     { VKD3D_STRING_COMPARE_EXACT, "Starfield.exe",
-            VKD3D_CONFIG_FLAG_REQUIRES_COMPUTE_INDIRECT_TEMPLATES | VKD3D_CONFIG_FLAG_REJECT_PADDED_SMALL_RESOURCE_ALIGNMENT, 0 },
+            VKD3D_CONFIG_FLAG_HUGE_NV_DGC_BUFFERS | VKD3D_CONFIG_FLAG_REJECT_PADDED_SMALL_RESOURCE_ALIGNMENT, 0 },
     /* Persona 3 Reload (2161700). Enables RT by default on Deck and does not run acceptably for a verified title. */
     { VKD3D_STRING_COMPARE_EXACT, "P3R.exe", 0, 0, VKD3D_APPLICATION_FEATURE_NO_DEFAULT_DXR_ON_DECK },
     /* Basically never bothers doing initial transitions.
@@ -732,13 +729,13 @@ struct vkd3d_shader_quirk_meta
 };
 
 static const struct vkd3d_shader_quirk_hash ue4_hashes[] = {
-    { 0x08a323ee81c1e393ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0x75dcbd76ee898815ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0x6c37b5a66059b751ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0xaf6d07d7b56a3effull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0xa48ead2a618e12d8ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0xebfd864995d3fc07ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
-    { 0xcca7b582db60199cull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0x08a323ee81c1e393ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0x75dcbd76ee898815ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0x6c37b5a66059b751ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0xaf6d07d7b56a3effull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0xa48ead2a618e12d8ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0xebfd864995d3fc07ull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
+    { NULL, 0xcca7b582db60199cull, VKD3D_SHADER_QUIRK_FORCE_EXPLICIT_LOD_IN_CONTROL_FLOW },
 };
 
 static const struct vkd3d_shader_quirk_info ue4_quirks = {
@@ -753,7 +750,7 @@ static const struct vkd3d_shader_quirk_hash borderlands3_hashes[] = {
     /* Shader breaks due to floor(a / exp(x)) being refactored to floor(a * exp(-x))
      * and shader does not expect this.
      * See https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/19910. */
-    { 0xbf0af7db6a7fb86bull, VKD3D_SHADER_QUIRK_FORCE_NOCONTRACT_MATH },
+    { NULL, 0xbf0af7db6a7fb86bull, VKD3D_SHADER_QUIRK_FORCE_NOCONTRACT_MATH },
 };
 
 static const struct vkd3d_shader_quirk_info borderlands3_quirks = {
@@ -774,16 +771,16 @@ static const struct vkd3d_shader_quirk_info atelier_yumia_quirks = {
  * Just pretend the subgroup size is non-sensical to use the normal FFX CACAO code path. */
 static const struct vkd3d_shader_quirk_hash re_hashes[] = {
     /* RE4 */
-    { 0xa100b53736f9c1bfull, VKD3D_SHADER_QUIRK_FORCE_SUBGROUP_SIZE_1 },
+    { NULL, 0xa100b53736f9c1bfull, VKD3D_SHADER_QUIRK_FORCE_SUBGROUP_SIZE_1 },
     /* RE2 and RE7 */
-    { 0x1c4c8782b75c498bull, VKD3D_SHADER_QUIRK_FORCE_SUBGROUP_SIZE_1 },
+    { NULL, 0x1c4c8782b75c498bull, VKD3D_SHADER_QUIRK_FORCE_SUBGROUP_SIZE_1 },
     /* Temporary driver workaround for RADV. See https://gitlab.freedesktop.org/mesa/mesa/-/issues/9852. */
     /* This shader trips on Mesa 23.0.3. */
-    { 0xdb1593ced60da3f1ull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
+    { NULL, 0xdb1593ced60da3f1ull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
     /* This shader hangs on Mesa main. */
-    { 0x5784e9e2f7a76819ull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
+    { NULL, 0x5784e9e2f7a76819ull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
     /* This shader hangs on RDNA1 */
-    { 0x7b3cec4ba6d32cacull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
+    { NULL, 0x7b3cec4ba6d32cacull, VKD3D_SHADER_QUIRK_REWRITE_GRAD_TO_BIAS },
 };
 
 static const struct vkd3d_shader_quirk_info re_quirks = {
@@ -800,7 +797,7 @@ static const struct vkd3d_shader_quirk_hash mhr_hashes[] = {
     /* Shader is extremely sensitive to nocontract behavior.
      * There some places where catastrophic cancellation occurs
      * and one ULP difference is the difference between blown out bloom and not. */
-    { 0xd892f8024f52d3ca, VKD3D_SHADER_QUIRK_FORCE_NOCONTRACT_MATH },
+    { NULL, 0xd892f8024f52d3ca, VKD3D_SHADER_QUIRK_FORCE_NOCONTRACT_MATH },
 };
 
 static const struct vkd3d_shader_quirk_info mhr_quirks = {
@@ -812,7 +809,7 @@ static const struct vkd3d_shader_quirk_hash witcher3_hashes[] = {
      * by a VS -> tess -> geom pass that writes out data to a UAV in the GS.
      * There appears to be missing synchronization here by game (no UAV -> VBO barrier) and
      * forcing barriers fixes a ton of glitches on both NV and RADV. */
-    { 0x2c16686e5d9b04a8, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
+    { NULL, 0x2c16686e5d9b04a8, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info witcher3_quirks = {
@@ -827,7 +824,7 @@ static const struct vkd3d_shader_quirk_hash ac_mirage_hashes[] = {
     /* There is a write-after-read hazard.
      * Index buffer is being read from, and there is a compute shader afterwards
      * that writes to that index buffer without a barrier. */
-    { 0x0cb130fa374982e3, VKD3D_SHADER_QUIRK_FORCE_PRE_RASTERIZATION_BARRIER },
+    { NULL, 0x0cb130fa374982e3, VKD3D_SHADER_QUIRK_FORCE_PRE_RASTERIZATION_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info ac_mirage_quirks = {
@@ -838,7 +835,7 @@ static const struct vkd3d_shader_quirk_hash ffxvi_hashes[] = {
     /* On RADV 24.1.6 RDNA3, we seem to be plagued with a compiler bug/hardware quirk.
      * It works on main, but only by chance.
      * https://gitlab.freedesktop.org/mesa/mesa/-/issues/11738. */
-    { 0xa98606e01cdd5924, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
+    { NULL, 0xa98606e01cdd5924, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
 };
 
 static const struct vkd3d_shader_quirk_info ffxvi_quirks = {
@@ -860,7 +857,7 @@ static const struct vkd3d_shader_quirk_hash tfd_hashes[] = {
     /* ReflectionCaptureFilteredImportanceSamplingCS is somewhat broken as it assumes
      * that the lowest res mips are valid, but they are never written to by ReflectionCaptureGenerateMipmapCS.
      * It stops at 8x8 (the workgroup size). The workaround just clamps the explicit LOD to whatever mips is 8x8. */
-    { 0x74b8eaf23e3d166c, VKD3D_SHADER_QUIRK_ASSUME_BROKEN_SUB_8x8_CUBE_MIPS },
+    { NULL, 0x74b8eaf23e3d166c, VKD3D_SHADER_QUIRK_ASSUME_BROKEN_SUB_8x8_CUBE_MIPS },
 };
 
 static const struct vkd3d_shader_quirk_info tfd_quirks = {
@@ -879,9 +876,9 @@ static const struct vkd3d_shader_quirk_info starfield_quirks = {
 static const struct vkd3d_shader_quirk_hash rebirth_hashes[] = {
     /* GenerateMassiveEnvironmentBatchedNodesCS(). Missing barrier after a CS based clear.
      * Exactly same bug as before, but then it was ComputeBatchedMeshletOffsetsCS(). */
-    { 0xe6cb9c843fa1bd18, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
+    { NULL, 0xe6cb9c843fa1bd18, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
     /* 1.003 update. Hash changed, but didn't fix the bug. */
-    { 0xf047c7f2f4f32111, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
+    { NULL, 0xf047c7f2f4f32111, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info rebirth_quirks = {
@@ -891,7 +888,7 @@ static const struct vkd3d_shader_quirk_info rebirth_quirks = {
 /* Game misses a transition from color to resource before FSR3.
  * The shader hash is FSR3-PREPARE-INPUTS. */
 static const struct vkd3d_shader_quirk_hash satisfactory_hashes[] = {
-    { 0x1bc3c90cfe16ad1e, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER },
+    { NULL, 0x1bc3c90cfe16ad1e, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info satisfactory_quirks = {
@@ -901,7 +898,7 @@ static const struct vkd3d_shader_quirk_info satisfactory_quirks = {
 static const struct vkd3d_shader_quirk_hash deadspace_hashes[] = {
     /* Shader calculates derivatives in non-uniform control flow,
      * leading to NaN pixels on Nvidia GPUs. */
-    { 0x8b981fdafe14b649, VKD3D_SHADER_QUIRK_HOIST_DERIVATIVES },
+    { NULL, 0x8b981fdafe14b649, VKD3D_SHADER_QUIRK_HOIST_DERIVATIVES },
 };
 
 static const struct vkd3d_shader_quirk_info deadspace_quirks = {
@@ -910,7 +907,7 @@ static const struct vkd3d_shader_quirk_info deadspace_quirks = {
 
 static const struct vkd3d_shader_quirk_hash death_stranding_hashes[] = {
     /* Game forgets to transition RENDER_TARGET to PIXEL_SHADER_RESOURCE. */
-    { 0x014fa51aaa3f3139, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
+    { NULL, 0x014fa51aaa3f3139, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
 };
 
 static const struct vkd3d_shader_quirk_info death_stranding_quirks = {
@@ -919,7 +916,7 @@ static const struct vkd3d_shader_quirk_info death_stranding_quirks = {
 
 static const struct vkd3d_shader_quirk_hash wuthering_waves_hashes[] = {
     /* LightGridInjectionCS. Forgets to UAV barrier after ClearCS. */
-    { 0x0e31f94fee8016dd, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
+    { "LightGridInjectionCS", 0, VKD3D_SHADER_QUIRK_FORCE_PRE_COMPUTE_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info wuthering_waves_quirks = {
@@ -933,8 +930,8 @@ static const struct vkd3d_shader_quirk_info dune_quirks = {
 static const struct vkd3d_shader_quirk_hash bl4_hashes[] = {
     /* See Mesa issue 13981. Impossible looking HW bug on RDNA2 specifically
      * caused by NSA image_sample_d. */
-    { 0x3b9937c41027ca73, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
-    { 0x0bf58981278d2126, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
+    { NULL, 0x3b9937c41027ca73, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
+    { NULL, 0x0bf58981278d2126, VKD3D_SHADER_QUIRK_DISABLE_OPTIMIZATIONS },
 };
 
 static const struct vkd3d_shader_quirk_info bl4_quirks = {
@@ -945,7 +942,7 @@ static const struct vkd3d_shader_quirk_hash control_hashes[] = {
     /* A closest hit shader is doing x / sqrt(dot(x, x)) where X is 0.
      * It's fetching positions from a buffer from SBT root descriptors, so
      * this doesn't 100% prove a game bug, but it's overwhelmingly likely. */
-    { 0xdb22fce4505969f2, VKD3D_SHADER_QUIRK_FIXUP_RSQRT_INF_NAN },
+    { NULL, 0xdb22fce4505969f2, VKD3D_SHADER_QUIRK_FIXUP_RSQRT_INF_NAN },
 };
 
 static const struct vkd3d_shader_quirk_info control_quirks = {
@@ -954,7 +951,7 @@ static const struct vkd3d_shader_quirk_info control_quirks = {
 
 static const struct vkd3d_shader_quirk_hash rottr_hashes[] = {
     /* Game forgets to transition depth to pixel shader resource. */
-    { 0x7d1af7d0c7d63856, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
+    { NULL, 0x7d1af7d0c7d63856, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
 };
 
 static const struct vkd3d_shader_quirk_info rottr_quirks = {
@@ -963,7 +960,7 @@ static const struct vkd3d_shader_quirk_info rottr_quirks = {
 
 static const struct vkd3d_shader_quirk_hash hfw_hashes[] = {
     /* Classic case of a clear CS that is followed up by overwriting it without proper barrier. */
-    { 0x548a3de5dc3828ef, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
+    { NULL, 0x548a3de5dc3828ef, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info hfw_quirks = {
@@ -972,7 +969,7 @@ static const struct vkd3d_shader_quirk_info hfw_quirks = {
 
 /* Misses some sync with depth in SSDM_FillHolesDepthDisplacementPS */
 static const struct vkd3d_shader_quirk_hash crimson_desert_hashes[] = {
-    { 0xa2e7501dea1487da, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
+    { "SSDM_FillHolesDepthDisplacementPS", 0, VKD3D_SHADER_QUIRK_FORCE_GRAPHICS_BARRIER_BEFORE_RENDER_PASS },
 };
 
 static const struct vkd3d_shader_quirk_info crimson_desert_quirks = {
@@ -989,7 +986,7 @@ static const struct vkd3d_shader_quirk_info ds2_quirks = {
 };
 
 static const struct vkd3d_shader_quirk_hash spiderman2_hashes[] = {
-    { 0x324071d329f05ccc, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
+    { NULL, 0x324071d329f05ccc, VKD3D_SHADER_QUIRK_FORCE_COMPUTE_BARRIER },
 };
 
 static const struct vkd3d_shader_quirk_info spiderman2_quirks = {
@@ -1276,7 +1273,6 @@ static const struct vkd3d_debug_option vkd3d_config_options[] =
     {"preallocate_srv_mip_clamps", VKD3D_CONFIG_FLAG_PREALLOCATE_SRV_MIP_CLAMPS},
     {"force_initial_transition", VKD3D_CONFIG_FLAG_FORCE_INITIAL_TRANSITION},
     {"breadcrumbs_trace", VKD3D_CONFIG_FLAG_BREADCRUMBS | VKD3D_CONFIG_FLAG_BREADCRUMBS_TRACE},
-    {"requires_compute_indirect_templates", VKD3D_CONFIG_FLAG_REQUIRES_COMPUTE_INDIRECT_TEMPLATES},
     {"skip_driver_workarounds", VKD3D_CONFIG_FLAG_SKIP_DRIVER_WORKAROUNDS},
     {"enable_experimental_features", VKD3D_CONFIG_FLAG_ENABLE_EXPERIMENTAL_FEATURES},
     {"reject_padded_small_resource_alignment", VKD3D_CONFIG_FLAG_REJECT_PADDED_SMALL_RESOURCE_ALIGNMENT},
@@ -1832,17 +1828,6 @@ static void vkd3d_physical_device_info_apply_workarounds(struct vkd3d_physical_d
 
     if (!(vkd3d_config_flags & VKD3D_CONFIG_FLAG_SKIP_DRIVER_WORKAROUNDS))
     {
-        if (info->vulkan_1_2_properties.driverID == VK_DRIVER_ID_NVIDIA_PROPRIETARY &&
-                device->vk_info.NV_device_generated_commands_compute &&
-                (vkd3d_config_flags & VKD3D_CONFIG_FLAG_DISABLE_DGCC))
-        {
-            device->vk_info.NV_device_generated_commands_compute = false;
-            device->vk_info.EXT_device_generated_commands = false;
-            device->device_info.device_generated_commands_compute_features_nv.deviceGeneratedCompute = VK_FALSE;
-            device->device_info.device_generated_commands_features_ext.deviceGeneratedCommands = VK_FALSE;
-            WARN("Disabling DGCC due to config flag.\n");
-        }
-
         /* Two known bugs in the wild:
          * - presentID = 0 handling when toggling present mode is broken.
          * - swapchain fence is not enough to avoid DEVICE_LOST when resizing swapchain.
@@ -2042,12 +2027,12 @@ static void vkd3d_physical_device_info_init(struct vkd3d_physical_device_info *i
 
     if (vulkan_info->EXT_device_generated_commands)
     {
-        info->device_generated_commands_features_ext.sType =
+        info->device_generated_commands_features.sType =
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_EXT;
-        info->device_generated_commands_properties_ext.sType =
+        info->device_generated_commands_properties.sType =
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_EXT;
-        vk_prepend_struct(&info->features2, &info->device_generated_commands_features_ext);
-        vk_prepend_struct(&info->properties2, &info->device_generated_commands_properties_ext);
+        vk_prepend_struct(&info->features2, &info->device_generated_commands_features);
+        vk_prepend_struct(&info->properties2, &info->device_generated_commands_properties);
     }
 
     if (vulkan_info->EXT_robustness2)
@@ -2160,23 +2145,6 @@ static void vkd3d_physical_device_info_init(struct vkd3d_physical_device_info *i
         info->barycentric_features_khr.sType =
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_BARYCENTRIC_FEATURES_KHR;
         vk_prepend_struct(&info->features2, &info->barycentric_features_khr);
-    }
-
-    if (vulkan_info->NV_device_generated_commands)
-    {
-        info->device_generated_commands_features_nv.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_NV;
-        info->device_generated_commands_properties_nv.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_NV;
-        vk_prepend_struct(&info->features2, &info->device_generated_commands_features_nv);
-        vk_prepend_struct(&info->properties2, &info->device_generated_commands_properties_nv);
-    }
-
-    if (vulkan_info->NV_device_generated_commands_compute)
-    {
-        info->device_generated_commands_compute_features_nv.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_COMPUTE_FEATURES_NV;
-        vk_prepend_struct(&info->features2, &info->device_generated_commands_compute_features_nv);
     }
 
     if (vulkan_info->EXT_shader_image_atomic_int64)
@@ -3250,13 +3218,11 @@ static HRESULT vkd3d_init_device_caps(struct d3d12_device *device,
     physical_device_info->extended_dynamic_state2_features.extendedDynamicState2LogicOp = VK_FALSE;
 
     /* Unneeded. */
-    physical_device_info->device_generated_commands_compute_features_nv.deviceGeneratedComputeCaptureReplay = VK_FALSE;
-    physical_device_info->device_generated_commands_compute_features_nv.deviceGeneratedComputePipelines = VK_FALSE;
-    physical_device_info->device_generated_commands_features_ext.dynamicGeneratedPipelineLayout = VK_FALSE;
+    physical_device_info->device_generated_commands_features.dynamicGeneratedPipelineLayout = VK_FALSE;
 
     {
         const VkShaderStageFlags supported_stages =
-                physical_device_info->device_generated_commands_properties_ext.supportedIndirectCommandsShaderStages;
+                physical_device_info->device_generated_commands_properties.supportedIndirectCommandsShaderStages;
         VkShaderStageFlags required_stages = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_COMPUTE_BIT;
         if (physical_device_info->mesh_shader_features.meshShader)
             required_stages |= VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
@@ -3265,15 +3231,9 @@ static HRESULT vkd3d_init_device_caps(struct d3d12_device *device,
         {
             /* Can be relaxed if needed in the wild, but in principle, everything needs to be supported
              * to be D3D12 compliant. */
-            INFO("Not all relevant pipeline stages are supported by EXT_dgc. Skipping EXT.\n");
-            physical_device_info->device_generated_commands_features_ext.deviceGeneratedCommands = VK_FALSE;
+            INFO("Not all relevant pipeline stages are supported by EXT_dgc. Skipping.\n");
+            physical_device_info->device_generated_commands_features.deviceGeneratedCommands = VK_FALSE;
         }
-    }
-
-    if (physical_device_info->device_generated_commands_features_ext.deviceGeneratedCommands)
-    {
-        physical_device_info->device_generated_commands_features_nv.deviceGeneratedCommands = VK_FALSE;
-        physical_device_info->device_generated_commands_compute_features_nv.deviceGeneratedCompute = VK_FALSE;
     }
 
     if (!physical_device_info->vulkan_1_2_properties.robustBufferAccessUpdateAfterBind)
@@ -4157,7 +4117,7 @@ static HRESULT d3d12_device_create_scratch_buffer(struct d3d12_device *device, e
         alloc_info.heap_flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS | D3D12_HEAP_FLAG_CREATE_NOT_ZEROED;
         alloc_info.flags = VKD3D_ALLOCATION_FLAG_GLOBAL_BUFFER | VKD3D_ALLOCATION_FLAG_INTERNAL_SCRATCH;
         alloc_info.vk_memory_priority = vkd3d_convert_to_vk_prio(D3D12_RESIDENCY_PRIORITY_NORMAL);
-        if (device->device_info.device_generated_commands_features_ext.deviceGeneratedCommands)
+        if (device->device_info.device_generated_commands_features.deviceGeneratedCommands)
         {
             /* this flag cannot be used with the existing buffer heaps */
             alloc_info.explicit_global_buffer_usage =
@@ -9664,7 +9624,7 @@ static void d3d12_device_caps_init_feature_options21(struct d3d12_device *device
     /* Enable WGs in test suite to avoid bitrot. */
     options21->WorkGraphsTier = d3d12_device_supports_workgraphs(device) ?
             D3D12_WORK_GRAPHS_TIER_1_0 : D3D12_WORK_GRAPHS_TIER_NOT_SUPPORTED;
-    options21->ExecuteIndirectTier = device->device_info.device_generated_commands_features_ext.deviceGeneratedCommands ?
+    options21->ExecuteIndirectTier = device->device_info.device_generated_commands_features.deviceGeneratedCommands ?
             D3D12_EXECUTE_INDIRECT_TIER_1_1 : D3D12_EXECUTE_INDIRECT_TIER_1_0;
     options21->SampleCmpGradientAndBiasSupported = device->d3d12_caps.max_shader_model >= D3D_SHADER_MODEL_6_8 &&
             device->d3d12_caps.options14.AdvancedTextureOpsSupported;
@@ -10316,13 +10276,14 @@ static void vkd3d_compute_shader_interface_key(struct d3d12_device *device)
 
     key = hash_fnv1_iterate_u32(key, quirk_info->global_quirks);
     key = hash_fnv1_iterate_u32(key, quirk_info->default_quirks);
-    key = hash_fnv1_iterate_u32(key, quirk_info->num_hashes);
+    key = hash_fnv1_iterate_u32(key, quirk_info->num_entry_points);
     /* If apps attempt to use the same shader cache with different executables, we might end up with different
      * quirk tables due to app workarounds, so hash that too. */
-    for (i = 0; i < quirk_info->num_hashes; i++)
+    for (i = 0; i < quirk_info->num_entry_points; i++)
     {
-        key = hash_fnv1_iterate_u64(key, quirk_info->hashes[i].shader_hash);
-        key = hash_fnv1_iterate_u32(key, quirk_info->hashes[i].quirks);
+        key = hash_fnv1_iterate_u64(key, quirk_info->entry_points[i].shader_hash);
+        key = hash_fnv1_iterate_u32(key, quirk_info->entry_points[i].quirks);
+        key = hash_fnv1_iterate_string(key, quirk_info->entry_points[i].entry ? quirk_info->entry_points[i].entry : "");
     }
 
     for (i = 0; i < device->vk_info.shader_extension_count; i++)
@@ -10433,9 +10394,8 @@ static void vkd3d_scratch_pool_init(struct d3d12_device *device)
 
     if (device->device_info.vulkan_1_2_properties.driverID == VK_DRIVER_ID_NVIDIA_PROPRIETARY)
     {
-        if ((vkd3d_config_flags & VKD3D_CONFIG_FLAG_REQUIRES_COMPUTE_INDIRECT_TEMPLATES) &&
-            (device->device_info.device_generated_commands_compute_features_nv.deviceGeneratedCompute ||
-             device->device_info.device_generated_commands_features_ext.deviceGeneratedCommands))
+        if ((vkd3d_config_flags & VKD3D_CONFIG_FLAG_HUGE_NV_DGC_BUFFERS) &&
+            device->device_info.device_generated_commands_features.deviceGeneratedCommands)
         {
             /* DGCC preprocess buffers are gigantic on NV. Starfield requires 27 MB for 4096 dispatches ... */
             device->scratch_pools[VKD3D_SCRATCH_POOL_KIND_INDIRECT_PREPROCESS].block_size =
