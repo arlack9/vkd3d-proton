@@ -1408,38 +1408,38 @@ int vkd3d_shader_compile_dxil(const struct vkd3d_shader_code *dxbc,
     }
 
     /* Extract and validate CFG metadata from DXIL shader */
-    {
-        const uint32_t* cfg_headers = NULL;
-        const uint32_t* cfg_merges = NULL;
-        const uint32_t* cfg_continues = NULL;
-        const uint32_t* cfg_hints = NULL;
-        size_t cfg_count = 0;
+    // {
+    //     const uint32_t* cfg_headers = NULL;
+    //     const uint32_t* cfg_merges = NULL;
+    //     const uint32_t* cfg_continues = NULL;
+    //     const uint32_t* cfg_hints = NULL;
+    //     size_t cfg_count = 0;
 
-        /* Use TRACE for debug instead of hardcoded file paths */
-        TRACE("About to call dxil_spv_converter_get_cfg (regular shader)\n");
+    //     /* Use TRACE for debug instead of hardcoded file paths */
+    //     TRACE("About to call dxil_spv_converter_get_cfg (regular shader)\n");
 
-        int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
-                                                    &cfg_continues, &cfg_hints, &cfg_count);
+    //     int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+    //                                                 &cfg_continues, &cfg_hints, &cfg_count);
         
-        if (cfg_result == DXIL_SPV_SUCCESS)
-        {
-            TRACE("DXIL CFG: %zu control flow blocks extracted\n", cfg_count);
-            /* CFG metadata is now available for shader analysis:
-             * - cfg_headers: array of control flow header block IDs
-             * - cfg_merges: array of merge block IDs
-             * - cfg_continues: array of continue block IDs (for loops)
-             * - cfg_hints: array of control flow hints/metadata
-             * This data can be used for optimization or debugging purposes.
-             */
+    //     if (cfg_result == DXIL_SPV_SUCCESS)
+    //     {
+    //         TRACE("DXIL CFG: %zu control flow blocks extracted\n", cfg_count);
+    //         /* CFG metadata is now available for shader analysis:
+    //          * - cfg_headers: array of control flow header block IDs
+    //          * - cfg_merges: array of merge block IDs
+    //          * - cfg_continues: array of continue block IDs (for loops)
+    //          * - cfg_hints: array of control flow hints/metadata
+    //          * This data can be used for optimization or debugging purposes.
+    //          */
             
-            TRACE("CFG extracted successfully: %zu blocks\n", cfg_count);
-            dxil_cfg_log_metadata(NULL, "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
-        }
-        else
-        {
-            TRACE("DXIL CFG: No control flow metadata available (result: %d)\n", cfg_result);
-        }
-    }
+    //         TRACE("CFG extracted successfully: %zu blocks\n", cfg_count);
+    //         dxil_cfg_log_metadata(NULL, "unknown", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+    //     }
+    //     else
+    //     {
+    //         TRACE("DXIL CFG: No control flow metadata available (result: %d)\n", cfg_result);
+    //     }
+    // }
 
     {
         /* For now, we cannot support view instancing with fallback paths, but that's not a dxil-spirv issue,
@@ -1751,38 +1751,38 @@ int vkd3d_shader_compile_dxil_export(const struct vkd3d_shader_code *dxil,
     }
 
     /* Extract and validate CFG metadata from DXIL shader */
-    {
-        const uint32_t* cfg_headers = NULL;
-        const uint32_t* cfg_merges = NULL;
-        const uint32_t* cfg_continues = NULL;
-        const uint32_t* cfg_hints = NULL;
-        size_t cfg_count = 0;
+    // {
+    //     const uint32_t* cfg_headers = NULL;
+    //     const uint32_t* cfg_merges = NULL;
+    //     const uint32_t* cfg_continues = NULL;
+    //     const uint32_t* cfg_hints = NULL;
+    //     size_t cfg_count = 0;
 
-        /* Use TRACE for debug instead of hardcoded file paths */
-        TRACE("About to call dxil_spv_converter_get_cfg (ray tracing)\n");
+    //     /* Use TRACE for debug instead of hardcoded file paths */
+    //     TRACE("About to call dxil_spv_converter_get_cfg (ray tracing)\n");
 
-        int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
-                                                    &cfg_continues, &cfg_hints, &cfg_count);
+    //     int cfg_result = dxil_spv_converter_get_cfg(converter, &cfg_headers, &cfg_merges, 
+    //                                                 &cfg_continues, &cfg_hints, &cfg_count);
         
-        if (cfg_result == DXIL_SPV_SUCCESS)
-        {
-            TRACE("DXIL CFG: %zu control flow blocks extracted (ray tracing)\n", cfg_count);
-            /* CFG metadata is now available for shader analysis:
-             * - cfg_headers: array of control flow header block IDs
-             * - cfg_merges: array of merge block IDs
-             * - cfg_continues: array of continue block IDs (for loops)
-             * - cfg_hints: array of control flow hints/metadata
-             * This data can be used for optimization or debugging purposes.
-             */
+    //     if (cfg_result == DXIL_SPV_SUCCESS)
+    //     {
+    //         TRACE("DXIL CFG: %zu control flow blocks extracted (ray tracing)\n", cfg_count);
+    //         /* CFG metadata is now available for shader analysis:
+    //          * - cfg_headers: array of control flow header block IDs
+    //          * - cfg_merges: array of merge block IDs
+    //          * - cfg_continues: array of continue block IDs (for loops)
+    //          * - cfg_hints: array of control flow hints/metadata
+    //          * This data can be used for optimization or debugging purposes.
+    //          */
             
-            TRACE("CFG extracted successfully (ray tracing): %zu blocks\n", cfg_count);
-            dxil_cfg_log_metadata(NULL, "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
-        }
-        else
-        {
-            TRACE("DXIL CFG: No control flow metadata available (ray tracing, result: %d)\n", cfg_result);
-        }
-    }
+    //         TRACE("CFG extracted successfully (ray tracing): %zu blocks\n", cfg_count);
+    //         dxil_cfg_log_metadata(NULL, "unknown_rt", cfg_headers, cfg_merges, cfg_continues, cfg_hints, cfg_count);
+    //     }
+    //     else
+    //     {
+    //         TRACE("DXIL CFG: No control flow metadata available (ray tracing, result: %d)\n", cfg_result);
+    //     }
+    // }
 
     if (dxil_spv_converter_get_compiled_spirv(converter, &compiled) != DXIL_SPV_SUCCESS)
     {
