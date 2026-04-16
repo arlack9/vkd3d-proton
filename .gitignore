@@ -4,3 +4,15 @@ vkd3d-proton-*.tar.zst
 vkd3d-proton-*/
 /profiles/vulkan
 /profiles/profile-test
+/.vscode/
+/notes/
+/clang-build/
+build_complete.bat
+clang-native.ini
+meson.build
+build-win32-clang.txt
+build-win64-clang.txt
+/scripts/
+meson.build.old/
+meson_options.txt
+/builddir/
